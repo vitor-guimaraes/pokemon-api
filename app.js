@@ -21,7 +21,7 @@ const dbURI = `mongodb+srv://${dbUser}:${dbPassword}@cluster0.8bj40.mongodb.net/
 const {MongoClient} = require('mongodb');
 const client = new MongoClient(dbURI);  
 
-export const mongoConnection = {
+ const mongoConnection = {
     dbUser,
     dbPassword,
     dbURI,
@@ -53,10 +53,10 @@ async function connect2url(){
 
         await client.connect()
             .then (result = console.log('connected to pokedex\n')) 
-            // .then (listPokemons(5));
+            .then (listPokemons(21));
             // .then (importIntoDB(5));
             
-        await importIntoDB(1);
+        // await importIntoDB(1);
 
         // await createListing();
 
@@ -99,13 +99,17 @@ async function listPokemons(number){
     console.log(`First ${number} Pokemons are: `);
 
     Http.open('get', url);
-    Http.send();
+    
     Http.onreadystatechange = (e) => {
-        const resp = Http.responseText;
-        resp = JSON.parse(resp);
-        console.log(resp);
-        return resp;
+        //readyState === 4 -> fim da operacao 
+        if(Http.readyState === 4){
+            let resp = Http.responseText;
+            resp = JSON.parse(resp);
+            console.log(resp)
+            return resp.results;
+        }
     };
+    Http.send();
 }
 
 
@@ -134,22 +138,8 @@ async function createListing(client, resp){
 
 //IMPORT INTO DB
 
-async function importIntoDB(number){
-        const url = `https://pokeapi.co/api/v2/pokemon/?limit=${number}`;
-    
-        console.log(`First ${number} Pokemons are: `);
-    
-        Http.open('get', url);
-        Http.send();
-        Http.onreadystatechange = (e) => {
-            const resp = Http.responseText;
-            const pokeName = Http.responseText.name;
-            // resp = JSON.parse(resp);
-            console.log(resp);
-            console.log(pokeName);
-
-            // return resp;    
-        };
+async function importIntoDB(results){
+      //TODO - Fazer um map do results e salvar no mongo
 
         // const result = client.db('pokedex').collection('pokemons').insertOne(resp);
         // console.log(`New listing created with the following id: ${result.insertedId}`);
